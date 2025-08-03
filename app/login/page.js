@@ -1,10 +1,12 @@
 import Login from '@/components/Login'
+import Navbar from '@/components/Navbar'
 import React from 'react'
 
 function LoginPage() {
   return (
     <div>
-        <Login/>
+      <Navbar />
+      <Login />
     </div>
   )
 }
