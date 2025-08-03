@@ -2,11 +2,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Notification from './Notification';
+import { useRouter } from 'next/navigation';
 
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
+  const router = useRouter();
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -22,6 +24,9 @@ const Login = () => {
     if (userPayload.ok) {
       const msg = await userPayload.json();
       setMessage(msg);
+      localStorage.setItem('token', msg.token);
+      localStorage.setItem('username', msg.user.name);
+      router.push('/');
     }
     else {
       const msg = await userPayload.json();
