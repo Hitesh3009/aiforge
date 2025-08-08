@@ -48,14 +48,14 @@ export default function ImageGenerationPage() {
     const data = await fetch('/api/save/images', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-      body: JSON.stringify({ selectedImages,prompt }),
+      body: JSON.stringify({ selectedImages, prompt }),
     });
-    if(data.ok) {
+    if (data.ok) {
       const jsonData = await data.json();
       const msg = jsonData;
       setMessage(msg);
     }
-    else{
+    else {
       const jsonData = await data.json();
       const errorMsg = jsonData;
       setMessage(errorMsg);
@@ -77,7 +77,7 @@ export default function ImageGenerationPage() {
           className="w-full p-4 border border-gray-300 rounded-md resize-none h-36 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
-          onClick={handleGenerate}  
+          onClick={handleGenerate}
           disabled={loading}
           className="mt-4 w-full md:w-auto px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition text-sm md:text-base lg:text-xl"
         >
@@ -93,7 +93,7 @@ export default function ImageGenerationPage() {
           </h2>
           <div className='flex justify-center my-3 sticky top-4 z-20'>
             <button
-          onClick={handleSaveImages}
+              onClick={handleSaveImages}
               disabled={loading}
               className={`${selectedImages.length > 0 ? 'inline-block' : 'hidden'} cursor-pointer mt-4 ml-2  px-6 py-2 bg-green-600 hover:bg-green-700 text-sm md:text-base lg:text-xl text-white font-medium rounded-md transition`}
             >
@@ -117,14 +117,14 @@ export default function ImageGenerationPage() {
                   className={`relative cursor-pointer bg-white rounded-xl shadow-lg overflow-hidden transition-transform hover:scale-[1.02] ${isSelected(src) ? 'ring-4 ring-blue-500' : ''
                     }`}
                 >
-                  {/* Zoom/View Button */}
+                  {/* Zoom/View Button (Same style as Dashboard) */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedImage(src);
                     }}
-                    className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 text-sm shadow hover:bg-opacity-100"
-                    title="View Image"
+                    className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100"
+                    title="Zoom In"
                   >
                     🔍
                   </button>
@@ -151,28 +151,28 @@ export default function ImageGenerationPage() {
 
       {selectedImage && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedImage(null)}
         >
           <div
-            className="max-w-3xl w-full p-4 bg-white rounded-xl shadow-lg relative"
+            className="relative max-w-5xl w-full flex justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl"
+              className="absolute top-4 right-4 text-white hover:text-red-400 text-3xl z-10"
             >
               &times;
             </button>
             <img
               src={`data:image/jpeg;base64,${selectedImage}`}
-              alt="Enlarged"
-              className="w-full h-[30rem] rounded-lg object-contain"
+              alt="Zoomed"
+              className="max-h-[90vh] w-auto rounded-lg shadow-lg object-contain"
             />
           </div>
         </div>
       )}
-      <Notification isLogin={false}  message={message.status===500 || message.status===401 ? message.error : message.message} statusCode={message.status} onClose={() => setMessage('')} />
+      <Notification isLogin={false} message={message.status === 500 || message.status === 401 ? message.error : message.message} statusCode={message.status} onClose={() => setMessage('')} />
     </main>
   );
 }
