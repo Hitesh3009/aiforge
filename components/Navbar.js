@@ -11,13 +11,39 @@ const Navbar = () => {
   const [isLogin, setIsLogin] = useState(false);
   const [username, setUsername] = useState('');
 
+  const verifyToken = async () => {
+    const verifyPayload = await fetch('http://localhost:3000/api/auth/verify', {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: localStorage.getItem('token') })
+    });
+    const verifyResult = await verifyPayload.json();
+    return verifyResult.success;
+  }
+
   useEffect(() => {
     let token = localStorage.getItem('token');
     let name = localStorage.getItem('username');
     setIsLogin(!!token);
     setUsername(name);
-  },[])
+  }, [])
 
+  useEffect(() => {
+    const verifyToken = async () => {
+      const verifyPayload = await fetch('http://localhost:3000/api/auth/verify', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: localStorage.getItem('token') })
+      });
+      const verifyResult = await verifyPayload.json();
+      if (!verifyResult.success) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        setIsLogin(false);
+      }
+    }
+    verifyToken();
+  }, [])
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
@@ -34,44 +60,44 @@ const Navbar = () => {
       {/* Desktop Links */}
       <div className="space-x-4 hidden md:flex items-center relative">
 
-          {/* Generate Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setGenerateDropdownOpen(!generateDropdownOpen)}
-              className="flex items-center text-gray-300 hover:text-blue-600 gap-1 cursor-pointer"
-            >
-              Generate <ChevronDown size={16} />
-            </button>
+        {/* Generate Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setGenerateDropdownOpen(!generateDropdownOpen)}
+            className="flex items-center text-gray-300 hover:text-blue-600 gap-1 cursor-pointer"
+          >
+            Generate <ChevronDown size={16} />
+          </button>
 
-            {generateDropdownOpen && (
-              <div className="absolute top-8 left-0 bg-white rounded shadow-lg py-2 z-50 w-48">
-                <Link
-                  href={`${isLogin?'/generate/image':'/login'}`}
-                  className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
-                  onClick={() => setGenerateDropdownOpen(false)}
-                >
-                  Image Generation
-                </Link>
-                <Link
-                  href={`${isLogin?'/generate/video':'/login'}`}
-                  className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
-                  onClick={() => setGenerateDropdownOpen(false)}
-                >
-                  Video Generation
-                </Link>
-                <Link
-                  href={`${isLogin?'/generate/speech':'/login'}`}
-                  className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
-                  onClick={() => setGenerateDropdownOpen(false)}
-                >
-                  Speech Generation
-                </Link>
-              </div>
-            )}
-          </div>
+          {generateDropdownOpen && (
+            <div className="absolute top-8 left-0 bg-white rounded shadow-lg py-2 z-50 w-48">
+              <Link
+                href={`${isLogin ? '/generate/image' : '/login'}`}
+                className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                onClick={() => setGenerateDropdownOpen(false)}
+              >
+                Image Generation
+              </Link>
+              {/* <Link
+                href={`${isLogin ? '/generate/video' : '/login'}`}
+                className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                onClick={() => setGenerateDropdownOpen(false)}
+              >
+                Video Generation
+              </Link> */}
+              <Link
+                href={`${isLogin ? '/generate/speech' : '/login'}`}
+                className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                onClick={() => setGenerateDropdownOpen(false)}
+              >
+                Speech Generation
+              </Link>
+            </div>
+          )}
+        </div>
 
-          <Link href={`${isLogin?'/edit':'/login'}`} className="text-gray-300 hover:text-blue-600">Edit</Link>
-          <Link href={`${isLogin?'/articles':'/login'}`} className="text-gray-300 hover:text-blue-600">Articles</Link>
+        <Link href={`${isLogin ? '/edit' : '/login'}`} className="text-gray-300 hover:text-blue-600">Edit</Link>
+        <Link href={`${isLogin ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600">Articles</Link>
 
         {
           !isLogin ? (
@@ -112,32 +138,32 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="absolute top-16 left-0 w-full bg-black shadow-md px-6 py-4 flex flex-col space-y-3 md:hidden z-50">
-                {/* Generate Dropdown in Mobile */}
-                <div className="space-y-1">
-                  <button
-                    className="flex items-center justify-between w-full text-gray-300 font-medium"
-                    onClick={() => setMobileGenerateOpen(!mobileGenerateOpen)}
-                  >
-                    <span>Generate</span>
-                    <ChevronDown size={16} className={`${mobileGenerateOpen ? 'rotate-180' : ''} transition-transform`} />
-                  </button>
-                  {mobileGenerateOpen && (
-                    <div className="pl-4 space-y-1">
-                      <Link href={`${isLogin?'/generate/image':'/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
-                        Image Generation
-                      </Link>
-                      <Link href={`${isLogin?'/generate/video':'/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
-                        Video Generation
-                      </Link>
-                      <Link href={`${isLogin?'/generate/speech':'/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
-                        Speech Generation
-                      </Link>
-                    </div>
-                  )}
-                </div>
+          {/* Generate Dropdown in Mobile */}
+          <div className="space-y-1">
+            <button
+              className="flex items-center justify-between w-full text-gray-300 font-medium"
+              onClick={() => setMobileGenerateOpen(!mobileGenerateOpen)}
+            >
+              <span>Generate</span>
+              <ChevronDown size={16} className={`${mobileGenerateOpen ? 'rotate-180' : ''} transition-transform`} />
+            </button>
+            {mobileGenerateOpen && (
+              <div className="pl-4 space-y-1">
+                <Link href={`${isLogin ? '/generate/image' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
+                  Image Generation
+                </Link>
+                <Link href={`${isLogin ? '/generate/video' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
+                  Video Generation
+                </Link>
+                <Link href={`${isLogin ? '/generate/speech' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
+                  Speech Generation
+                </Link>
+              </div>
+            )}
+          </div>
 
-                <Link href={`${isLogin?'/edit':'/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Edit</Link>
-                <Link href={`${isLogin?'/articles':'/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Articles</Link>
+          <Link href={`${isLogin ? '/edit' : '/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Edit</Link>
+          <Link href={`${isLogin ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Articles</Link>
 
           {
             !isLogin ? (
