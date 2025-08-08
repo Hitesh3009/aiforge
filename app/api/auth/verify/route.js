@@ -14,10 +14,11 @@ export async function POST(req) {
     return new Response(JSON.stringify({ 
       userEmail: verifyPayload.email, 
       userID: verifyPayload.id,
-      status: 200 
+      status: 200,
+      success:true
     }));
     
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message, status: 500 }));
+    return new Response(JSON.stringify({ error: err.message, status: 500 ,success:false}));
   }
 }
