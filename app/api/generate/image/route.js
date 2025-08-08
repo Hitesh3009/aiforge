@@ -3,7 +3,6 @@ import { GoogleGenAI, Modality } from "@google/genai";
 export async function POST(req) {
     const { prompt } = await req.json();
     const authHeader = await req.headers.get('authorization');;
-    console.log(authHeader);
     
     if (!authHeader) {
         return new Response(JSON.stringify({ error: 'Authorization token is required' }, { status: 401 }));
@@ -15,9 +14,9 @@ export async function POST(req) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token: token })
         });
-
-        if (!verifyPayload.ok) {
-            return new Response(JSON.stringify({ error: 'Unauthorized' }, { status: 401 }));
+        const verifyResult = await verifyPayload.json();
+        if (!verifyResult.success) {
+            return new Response(JSON.stringify({ error: 'Unauthorized.Please,Login Again' }, { status: 401 }));
         }
         else {
 
@@ -46,7 +45,7 @@ export async function POST(req) {
                 }
             });
             // console.log('Generated images:', responseArr);
-            return new Response(JSON.stringify({ images: responseArr, status: 201 , userDetails:await verifyPayload.json()}, { status: 201 }));
+            return new Response(JSON.stringify({ images: responseArr, status: 201 , userDetails:verifyResult}, { status: 201 }));
         }
     }
     catch (error) {
