@@ -7,10 +7,10 @@ import jwt from 'jsonwebtoken';
 export async function POST(req) {
     try {
         const { email, password } = await req.json();
-        console.log(email, password);
+        // console.log(email, password);
         await connectToDatabase();
         const user = await User.findOne({ email });
-        console.log(user);
+        // console.log(user);
         const jwtToken=jwt.sign({id:user._id.toString(),email:user.email}, process.env.SECRET_KEY, { expiresIn: '1h'  })
         
         if (!user) {
