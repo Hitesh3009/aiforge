@@ -12,7 +12,7 @@ const Navbar = () => {
   const [username, setUsername] = useState('');
 
   const verifyToken = async () => {
-    const verifyPayload = await fetch('http://localhost:3000/api/auth/verify', {
+    const verifyPayload = await fetch(`${process.env.DOMAIN_NAME}/api/auth/verify`, {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem('token') })
@@ -30,7 +30,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const verifyToken = async () => {
-      const verifyPayload = await fetch('http://localhost:3000/api/auth/verify', {
+      const verifyPayload = await fetch('${process.env.DOMAIN_NAME}/api/auth/verify', {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: localStorage.getItem('token') })
@@ -96,7 +96,7 @@ const Navbar = () => {
           )}
         </div>
 
-        <Link href={`${isLogin ? '/edit' : '/login'}`} className="text-gray-300 hover:text-blue-600">Edit</Link>
+        <Link href={`${isLogin ? '/edit/image' : '/login'}`} className="text-gray-300 hover:text-blue-600">Edit</Link>
         <Link href={`${isLogin ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600">Articles</Link>
 
         {

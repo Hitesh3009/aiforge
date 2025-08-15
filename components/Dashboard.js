@@ -14,7 +14,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/getImages', {
+        const res = await fetch(`${process.env.DOMAIN_NAME}/api/getImages`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export default function Dashboard() {
     if (!imageToDelete) return;
 
     try {
-      const res = await fetch(`http://localhost:3000/api/delete/image/${imageToDelete.id}`, {
+      const res = await fetch(`${process.env.DOMAIN_NAME}/api/delete/image/${imageToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
