@@ -12,7 +12,7 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Signing up:', form);
+    // console.log('Signing up:', form);
     const userPayload = await fetch('/api/auth/signup', {
       method: 'POST',
       body: JSON.stringify(form),
@@ -24,7 +24,7 @@ const Signup = () => {
     }
     else {
       const msg = await userPayload.json();
-      console.log('Error:', msg);
+      // console.log('Error:', msg);
       setMessage(msg);
     }
   };
