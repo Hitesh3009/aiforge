@@ -4,7 +4,7 @@ import { Image } from '@/models/Schema';
 export async function DELETE(req,{params}) {
 
     const authHeader = await req.headers.get('authorization');;
-    console.log(authHeader);
+    // console.log(authHeader);
     
     if (!authHeader) {
         return new Response(JSON.stringify({ error: 'Authorization token is required' ,status:401}, { status: 401 }));
@@ -12,7 +12,7 @@ export async function DELETE(req,{params}) {
     const tokenFromHeader = authHeader.split(' ')[1];
     try {
         await connectToDatabase();
-        const verifyPayload = await fetch('http://localhost:3000/api/auth/verify', {
+        const verifyPayload = await fetch(`${process.env.DOMAIN_NAME}/api/auth/verify`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token: tokenFromHeader })
