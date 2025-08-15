@@ -12,7 +12,7 @@ export async function DELETE(req,{params}) {
     const tokenFromHeader = authHeader.split(' ')[1];
     try {
         await connectToDatabase();
-        const verifyPayload = await fetch(`${process.env.DOMAIN_NAME}/api/auth/verify`, {
+        const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token: tokenFromHeader })

@@ -12,7 +12,7 @@ const Navbar = () => {
   const [username, setUsername] = useState('');
 
   const verifyToken = async () => {
-    const verifyPayload = await fetch(`${process.env.DOMAIN_NAME}/api/auth/verify`, {
+    const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: localStorage.getItem('token') })
@@ -30,7 +30,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const verifyToken = async () => {
-      const verifyPayload = await fetch('${process.env.DOMAIN_NAME}/api/auth/verify', {
+      const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: localStorage.getItem('token') })

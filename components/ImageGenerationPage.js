@@ -16,7 +16,7 @@ export default function ImageGenerationPage() {
   }, [])
 
   const generateImagesApi = async (userPrompt) => {
-    const data = await fetch(`${process.env.DOMAIN_NAME}/api/generate/image`, {
+    const data = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/generate/image`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
       body: JSON.stringify({ prompt: userPrompt }),

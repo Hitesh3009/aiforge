@@ -11,7 +11,7 @@ export default function EditImage() {
     useEffect(() => {
         const fetchImages = async () => {
             try {
-                const res = await fetch(`${process.env.DOMAIN_NAME}/api/getImages`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/getImages`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export default function EditImage() {
                 return;
             }
 
-            const res = await fetch("${process.env.DOMAIN_NAME}/api/edit/image", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/edit/image`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -9,7 +9,7 @@ export async function POST(req) {
     }
     const token = authHeader.split(' ')[1];
     try {
-        const verifyPayload = await fetch(`${process.env.DOMAIN_NAME}/api/auth/verify`, {
+        const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token: token })
