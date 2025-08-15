@@ -15,7 +15,7 @@ const Login = () => {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log('Logging in:', form);
+    // console.log('Logging in:', form);
     const userPayload=await fetch('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(form),
@@ -30,7 +30,7 @@ const Login = () => {
     }
     else {
       const msg = await userPayload.json();
-      console.log('Error:', msg);
+      // console.log('Error:', msg);
       setMessage(msg);
     }
   };
