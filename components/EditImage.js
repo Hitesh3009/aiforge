@@ -307,7 +307,7 @@ export default function EditImage() {
                         </h2>
                         <button
                             onClick={() => document.getElementById("galleryModal").close()}
-                            className="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg shadow-sm"
+                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg shadow-sm"
                         >
                             Close
                         </button>
@@ -341,7 +341,7 @@ export default function EditImage() {
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
                                     {/* Zoom */}
-                                    <button
+                                    {/* <button
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setZoomedImage(
@@ -351,7 +351,7 @@ export default function EditImage() {
                                         className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100"
                                     >
                                         🔍
-                                    </button>
+                                    </button> */}
                                     <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-semibold">
                                         Select
                                     </div>
