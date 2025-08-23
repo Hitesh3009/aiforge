@@ -152,9 +152,9 @@ const Navbar = () => {
                 <Link href={`${isLogin ? '/generate/image' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
                   Image Generation
                 </Link>
-                <Link href={`${isLogin ? '/generate/video' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
+                {/* <Link href={`${isLogin ? '/generate/video' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
                   Video Generation
-                </Link>
+                </Link> */}
                 <Link href={`${isLogin ? '/generate/speech' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
                   Speech Generation
                 </Link>
