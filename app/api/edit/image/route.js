@@ -39,7 +39,7 @@ export async function POST(req) {
             ];
             // console.log(contents);
             
-            const imagePromises = Array.from({ length: 1 }, async () => {
+            const imagePromises = Array.from({ length: 3 }, async () => {
 
                 return await ai.models.generateContent({
                     model: "gemini-2.0-flash-preview-image-generation",
