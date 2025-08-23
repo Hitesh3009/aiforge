@@ -2,10 +2,13 @@
 import { useEffect, useState } from 'react';
 import Notification from './Notification';
 import Carousel3D from './Carousel3D';
+import CarouselSkeleton from './CarouselSkeleton';
+
 
 export default function Dashboard() {
   const [images, setImages] = useState([]);
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -21,6 +24,8 @@ export default function Dashboard() {
         setImages(data.imageArr || []);
       } catch (err) {
         console.error('Failed to load images:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -53,6 +58,9 @@ export default function Dashboard() {
     }
   };
 
+  if (loading) {
+    return <CarouselSkeleton />; // 🔥 show skeleton while fetching
+  }
 
   if (!images.length) {
     return <p className="text-center mt-10 text-gray-500">No images found.</p>;
