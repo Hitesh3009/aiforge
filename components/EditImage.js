@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Notification from "./Notification";
 
 export default function EditImage() {
     const [selectedImage, setSelectedImage] = useState(null);
@@ -7,6 +8,10 @@ export default function EditImage() {
     const [caption, setCaption] = useState("");
     const [editedImages, setEditedImages] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
+    const [zoomedImage, setZoomedImage] = useState(null);
+    const [saving, setSaving] = useState(false); // new state for saving images
+    const [selectedEdited, setSelectedEdited] = useState([]);
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -41,6 +46,26 @@ export default function EditImage() {
         }
     };
 
+    const handleSaveImages = async () => {
+        if (selectedEdited.length === 0) return;
+
+        setSaving(true); // disable button + show saving state
+        try {
+            const data = await fetch('/api/save/images', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ selectedImages: selectedEdited, prompt: caption }),
+            });
+
+            const jsonData = await data.json();
+            setMessage(jsonData);
+        } catch (error) {
+            setMessage({ error: "Failed to save images", status: 500 });
+        } finally {
+            setSaving(false); // re-enable button after request finishes
+        }
+    };
+
     const handleGallerySelect = (img) => {
         if (selectedImage && selectedImage.startsWith("blob:")) {
             URL.revokeObjectURL(selectedImage);
@@ -67,19 +92,17 @@ export default function EditImage() {
             let base64Data = "";
 
             if (selectedImage.startsWith("blob:")) {
-                // Convert Blob URL to Base64
-                const blob = await fetch(selectedImage).then(res => res.blob());
+                const blob = await fetch(selectedImage).then((res) => res.blob());
                 base64Data = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         const result = reader.result;
-                        resolve(result.split(",")[1]); // remove data:image/...;base64,
+                        resolve(result.split(",")[1]);
                     };
                     reader.onerror = reject;
                     reader.readAsDataURL(blob);
                 });
             } else if (selectedImage.startsWith("data:")) {
-                // Already base64, just remove the prefix
                 base64Data = selectedImage.split(",")[1];
             } else {
                 console.error("Unsupported image format");
@@ -96,21 +119,23 @@ export default function EditImage() {
                 body: JSON.stringify({
                     inpBase64Img: base64Data,
                     prompt: caption,
-                })
+                }),
             });
 
             const data = await res.json();
-            console.log(data);
-            
             setEditedImages(data.images || []);
             setIsEditing(false);
-
         } catch (error) {
             console.log("Failed to generate edit image:", error);
             setIsEditing(false);
         }
     };
 
+    const toggleSelectEdited = (img) => {
+        setSelectedEdited((prev) =>
+            prev.includes(img) ? prev.filter((i) => i !== img) : [...prev, img]
+        );
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-200 p-4">
@@ -157,6 +182,14 @@ export default function EditImage() {
                                     alt="Selected"
                                     className="max-h-64 rounded-lg shadow-lg mx-auto border"
                                 />
+                                {/* Zoom button */}
+                                <button
+                                    onClick={() => setZoomedImage(selectedImage)}
+                                    className="absolute top-2 left-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100"
+                                >
+                                    🔍
+                                </button>
+                                {/* Remove */}
                                 <button
                                     onClick={handleRemoveImage}
                                     className="absolute -top-3 -right-3 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg"
@@ -184,17 +217,55 @@ export default function EditImage() {
                     {/* Edited Images */}
                     {editedImages.length > 0 && (
                         <div className="mt-8">
-                            <h2 className="text-xl font-semibold mb-4 text-center">
+                            <h2 className="text-xl font-semibold mb-4 text-center text-cyan-700">
                                 Edited Results
                             </h2>
+                            <div className='flex justify-center my-3 sticky top-4 z-20'>
+                                {selectedEdited.length > 0 && (
+                                    <button
+                                        onClick={handleSaveImages}
+                                        disabled={saving}
+                                        className={`mt-4 ml-2 px-6 py-2 rounded-md transition text-sm md:text-base lg:text-xl text-white font-medium 
+                  ${saving
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-green-600 hover:bg-green-700'
+                                            }`
+                                        }
+                                    >
+                                        {saving ? 'Saving...' : 'Save images to Gallery?'}
+                                    </button>
+                                )}
+                            </div>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 {editedImages.map((img, index) => (
-                                    <img
+                                    <div
                                         key={index}
-                                        src={`data:image/png;base64,${img.data}`}
-                                        alt={`Edited ${index}`}
-                                        className="rounded-lg shadow-md border max-h-64 object-cover mx-auto"
-                                    />
+                                        onClick={() => toggleSelectEdited(img)}
+                                        className={`relative cursor-pointer rounded-lg shadow-md border overflow-hidden ${selectedEdited.includes(img) ? "ring-4 ring-blue-500" : ""
+                                            }`}
+                                    >
+                                        <img
+                                            src={`data:image/png;base64,${img}`}
+                                            alt={`Edited ${index}`}
+                                            className="rounded-lg max-h-64 object-cover w-full h-full"
+                                        />
+                                        {/* Zoom button */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setZoomedImage(`data:image/png;base64,${img}`);
+                                            }}
+                                            className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100"
+                                        >
+                                            🔍
+                                        </button>
+                                        {/* Select badge */}
+                                        {selectedEdited.includes(img) && (
+                                            <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                                                ✔ Selected
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -202,11 +273,33 @@ export default function EditImage() {
                 </div>
             </div>
 
+            {/* Zoom Modal */}
+            {zoomedImage && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
+                    onClick={() => setZoomedImage(null)}
+                >
+                    <div
+                        className="relative max-w-5xl w-full flex justify-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setZoomedImage(null)}
+                            className="absolute top-4 right-4 text-white hover:text-red-400 text-3xl z-10"
+                        >
+                            &times;
+                        </button>
+                        <img
+                            src={zoomedImage}
+                            alt="Zoomed"
+                            className="max-h-[90vh] w-auto rounded-lg shadow-lg object-contain"
+                        />
+                    </div>
+                </div>
+            )}
+
             {/* Gallery Modal */}
-            <dialog
-                id="galleryModal"
-                className="modal bg-transparent backdrop:bg-black/50"
-            >
+            <dialog id="galleryModal" className="modal bg-transparent backdrop:bg-black/50">
                 <div className="bg-white rounded-3xl p-6 max-w-2xl mx-auto shadow-2xl">
                     <h2 className="text-lg font-semibold mb-4 text-gray-800">
                         Select from Gallery
@@ -228,6 +321,18 @@ export default function EditImage() {
                                     alt={`Gallery image ${index}`}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 />
+                                {/* Zoom */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setZoomedImage(
+                                            `data:${img.contentType};base64,${img.data}`
+                                        );
+                                    }}
+                                    className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100"
+                                >
+                                    🔍
+                                </button>
                                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-semibold">
                                     Select
                                 </div>
@@ -244,6 +349,12 @@ export default function EditImage() {
                     </div>
                 </div>
             </dialog>
+            <Notification
+                isLogin={false}
+                message={message.status === 500 || message.status === 401 ? message.error : message.message}
+                statusCode={message.status}
+                onClose={() => setMessage('')}
+            />
         </div>
     );
 }
