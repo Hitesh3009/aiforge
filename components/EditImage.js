@@ -301,45 +301,10 @@ export default function EditImage() {
             {/* Gallery Modal */}
             <dialog id="galleryModal" className="modal bg-transparent backdrop:bg-black/50">
                 <div className="bg-white rounded-3xl p-6 max-w-2xl mx-auto shadow-2xl">
-                    <h2 className="text-lg font-semibold mb-4 text-gray-800">
-                        Select from Gallery
-                    </h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        {images.map((img, index) => (
-                            <div
-                                key={index}
-                                className="relative group cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg transition"
-                                onClick={() => {
-                                    handleGallerySelect(
-                                        `data:${img.contentType};base64,${img.data}`
-                                    );
-                                    document.getElementById("galleryModal").close();
-                                }}
-                            >
-                                <img
-                                    src={`data:${img.contentType};base64,${img.data}`}
-                                    alt={`Gallery image ${index}`}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                                {/* Zoom */}
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setZoomedImage(
-                                            `data:${img.contentType};base64,${img.data}`
-                                        );
-                                    }}
-                                    className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100"
-                                >
-                                    🔍
-                                </button>
-                                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-semibold">
-                                    Select
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="mt-4 text-right">
+                    <div className="sticky top-0 bg-white z-20 flex justify-between items-center py-3">
+                        <h2 className="text-lg font-semibold text-gray-800">
+                            Select from Gallery
+                        </h2>
                         <button
                             onClick={() => document.getElementById("galleryModal").close()}
                             className="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg shadow-sm"
@@ -347,8 +312,56 @@ export default function EditImage() {
                             Close
                         </button>
                     </div>
+                    {/* If still loading, show skeletons */}
+                    {images.length === 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {[...Array(8)].map((_, index) => (
+                                <div
+                                    key={index}
+                                    className="animate-pulse bg-gray-300 rounded-xl h-28 sm:h-32 md:h-36"
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {images.map((img, index) => (
+                                <div
+                                    key={index}
+                                    className="relative group cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg transition"
+                                    onClick={() => {
+                                        handleGallerySelect(
+                                            `data:${img.contentType};base64,${img.data}`
+                                        );
+                                        document.getElementById("galleryModal").close();
+                                    }}
+                                >
+                                    <img
+                                        src={`data:${img.contentType};base64,${img.data}`}
+                                        alt={`Gallery image ${index}`}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                    {/* Zoom */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setZoomedImage(
+                                                `data:${img.contentType};base64,${img.data}`
+                                            );
+                                        }}
+                                        className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100"
+                                    >
+                                        🔍
+                                    </button>
+                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-semibold">
+                                        Select
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </dialog>
+
             <Notification
                 isLogin={false}
                 message={message.status === 500 || message.status === 401 ? message.error : message.message}
