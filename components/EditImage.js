@@ -302,7 +302,7 @@ export default function EditImage() {
             <dialog id="galleryModal" className="modal bg-transparent backdrop:bg-black/50">
                 <div className="bg-white rounded-3xl p-6 max-w-2xl mx-auto shadow-2xl">
                     <div className="sticky top-0 bg-white z-20 flex justify-between items-center py-3">
-                        <h2 className="text-lg font-semibold text-gray-800">
+                        <h2 className="text-base font-semibold text-gray-800">
                             Select from Gallery
                         </h2>
                         <button
