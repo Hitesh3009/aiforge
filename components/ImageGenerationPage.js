@@ -7,6 +7,7 @@ export default function ImageGenerationPage() {
   const [prompt, setPrompt] = useState('');
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false); // new state for saving images
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
   const [message, setMessage] = useState('');
@@ -24,7 +25,6 @@ export default function ImageGenerationPage() {
     const result = await data.json();
     return result;
   };
-
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -45,24 +45,27 @@ export default function ImageGenerationPage() {
   };
 
   const handleSaveImages = async () => {
-    const data = await fetch('/api/save/images', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-      body: JSON.stringify({ selectedImages, prompt }),
-    });
-    if (data.ok) {
+    if (selectedImages.length === 0) return;
+
+    setSaving(true); // disable button + show saving state
+    try {
+      const data = await fetch('/api/save/images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ selectedImages, prompt }),
+      });
+
       const jsonData = await data.json();
-      const msg = jsonData;
-      setMessage(msg);
-    }
-    else {
-      const jsonData = await data.json();
-      const errorMsg = jsonData;
-      setMessage(errorMsg);
+      setMessage(jsonData);
+    } catch (error) {
+      setMessage({ error: "Failed to save images", status: 500 });
+    } finally {
+      setSaving(false); // re-enable button after request finishes
     }
   };
 
   const isSelected = (img) => selectedImages.includes(img);
+
   return (
     <main className="min-h-screen px-4 md:px-12 py-10 bg-gradient-to-br from-[#eef2f3] via-[#d6e4f0] to-[#f3e7e9]">
       <h1 className="text-4xl font-bold text-center text-blue-800 mb-10 drop-shadow">
@@ -79,11 +82,11 @@ export default function ImageGenerationPage() {
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="mt-4 w-full md:w-auto px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition text-sm md:text-base lg:text-xl"
+          className={`mt-4 w-full md:w-auto px-6 py-2 rounded-md transition text-sm md:text-base lg:text-xl 
+            ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white font-medium'}`}
         >
           {loading ? 'Generating...' : 'Generate'}
         </button>
-
       </div>
 
       {(loading || images.length > 0) && (
@@ -91,15 +94,23 @@ export default function ImageGenerationPage() {
           <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">
             🖼️ Generated Images
           </h2>
+
           <div className='flex justify-center my-3 sticky top-4 z-20'>
-            <button
-              onClick={handleSaveImages}
-              disabled={loading}
-              className={`${selectedImages.length > 0 ? 'inline-block' : 'hidden'} cursor-pointer mt-4 ml-2  px-6 py-2 bg-green-600 hover:bg-green-700 text-sm md:text-base lg:text-xl text-white font-medium rounded-md transition`}
-            >
-              Save images to Gallery?
-            </button>
+            {selectedImages.length > 0 && (
+              <button
+                onClick={handleSaveImages}
+                disabled={saving}
+                className={`mt-4 ml-2 px-6 py-2 rounded-md transition text-sm md:text-base lg:text-xl text-white font-medium 
+                  ${saving
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700'
+                  }`}
+              >
+                {saving ? 'Saving...' : 'Save images to Gallery?'}
+              </button>
+            )}
           </div>
+
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             {loading
               ? Array.from({ length: 6 }).map((_, index) => (
@@ -172,7 +183,13 @@ export default function ImageGenerationPage() {
           </div>
         </div>
       )}
-      <Notification isLogin={false} message={message.status === 500 || message.status === 401 ? message.error : message.message} statusCode={message.status} onClose={() => setMessage('')} />
+
+      <Notification
+        isLogin={false}
+        message={message.status === 500 || message.status === 401 ? message.error : message.message}
+        statusCode={message.status}
+        onClose={() => setMessage('')}
+      />
     </main>
   );
 }
