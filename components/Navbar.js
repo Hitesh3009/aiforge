@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import { signOut, useSession } from "next-auth/react";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -10,7 +11,9 @@ const Navbar = () => {
   const [mobileGenerateOpen, setMobileGenerateOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [username, setUsername] = useState('');
-
+  const { data: session } = useSession();
+  // console.log(session);
+  
   const verifyToken = async () => {
     const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
       method: 'POST',
@@ -24,8 +27,8 @@ const Navbar = () => {
   useEffect(() => {
     let token = localStorage.getItem('token');
     let name = localStorage.getItem('username');
-    setIsLogin(!!token);
-    setUsername(name);
+      setIsLogin(!!token);
+      setUsername(name);
   }, [])
 
   useEffect(() => {
@@ -100,7 +103,7 @@ const Navbar = () => {
         <Link href={`${isLogin ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600">Articles</Link>
 
         {
-          !isLogin ? (
+          !session && !isLogin ? (
             <div className='space-x-3'>
               <Link href="/login">
                 <button className="px-4 py-2 border rounded-md text-sm font-medium text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white transition">
@@ -115,9 +118,9 @@ const Navbar = () => {
             </div>
           ) : (<Link href="/login">
             <div className='flex justify-evenly items-center space-x-2'>
-              <span className='text-purple-500'>Welcome Back, <b>{username}</b></span>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition" onClick={handleLogout}>
-                Logout
+              <span className='text-purple-500 cursor-default'>Welcome <b>{session ? session.user.name : username}</b></span>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition cursor-pointer" onClick={session ? ()=>signOut({ callbackUrl: '/login' }) : handleLogout}>
+                Sign Out
               </button>
             </div>
 
@@ -128,7 +131,7 @@ const Navbar = () => {
       {/* Hamburger Icon - mobile only */}
       <div className="md:hidden">
         <div className='flex justify-evenly items-center space-x-2'>
-          {isLogin && <span className='text-purple-500'>Welcome Back, <b>{username}</b></span>}
+          {session || isLogin ? <span className='text-purple-500'>Welcome <b>{session ? session.user.name : username}</b></span>:<div></div>}
           <button onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -166,7 +169,7 @@ const Navbar = () => {
           <Link href={`${isLogin ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Articles</Link>
 
           {
-            !isLogin ? (
+            !session && !isLogin ? (
               <div>
                 <Link href="/login" onClick={() => setMenuOpen(false)}>
                   <button className="w-full px-4 py-2 border rounded-md text-sm font-medium text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white transition">
@@ -180,8 +183,8 @@ const Navbar = () => {
                 </Link>
               </div>
             ) : (<Link href="/login" onClick={() => setMenuOpen(false)}>
-              <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition" onClick={handleLogout}>
-                Logout
+              <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition" onClick={session ? ()=>signOut({ callbackUrl: '/login' }) : handleLogout}>
+                Sign Out
               </button>
             </Link>)
           }
