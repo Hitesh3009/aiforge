@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Notification from './Notification';
 import { useRouter } from 'next/navigation';
+import { FaGithub } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
+import { signIn } from "next-auth/react";
 
 
 const Login = () => {
@@ -13,10 +16,34 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async(e) => {
+  const GitHubLoginButton=()=> {
+
+  return (
+    <button
+      onClick={()=>signIn('github',{ callbackUrl: '/' })}
+      className="flex items-center justify-center px-4 py-2 w-full border border-gray-300 rounded-lg shadow-sm bg-black space-x-2 text-sm font-medium text-white cursor-pointer">
+      <FaGithub className="text-xl" />
+      <span className="font-medium">Sign in with GitHub</span>
+    </button>
+  );
+}
+  const GoogleLoginButton=()=> {
+  
+  return (
+    <button
+      onClick={()=>signIn('google',{ callbackUrl: '/' })}
+      className="flex items-center justify-center px-4 py-2 w-full border border-gray-300 rounded-lg shadow-sm bg-blue-400 space-x-2 text-white text-sm font-medium cursor-pointer"
+    >
+      <FcGoogle  className="text-xl" />
+      <span className="font-medium">Sign in with Google</span>
+    </button>
+  );
+}
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // console.log('Logging in:', form);
-    const userPayload=await fetch('/api/auth/login', {
+    const userPayload = await fetch('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(form),
       headers: { 'Content-Type': 'application/json' },
@@ -39,6 +66,13 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-blue-600 mb-6">Login to AiForge</h2>
+        <div className='flex items-center flex-col space-y-4'>
+          {GoogleLoginButton()}
+          {GitHubLoginButton()}
+        </div>
+        <div className='my-5 flex justify-center'>
+        <span className='text-center text-black font-semibold'>OR</span>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
@@ -65,7 +99,8 @@ const Login = () => {
             Login
           </button>
         </form>
-        <Notification userName= {message.status===200 ? message.user.name : null} isLogin={true} email={form.email} message={message.status===404 || message.status===401 ? message.error : message.successMsg} statusCode={message.status} onClose={() => setMessage('')} />
+        <Notification userName={message.status === 200 ? message.user.name : null} isLogin={true} email={form.email} message={message.status === 404 || message.status === 401 ? message.error : message.successMsg} statusCode={message.status} onClose={() => setMessage('')} />
+        
         <p className="text-center text-sm text-gray-600 mt-4">
           Don&apos;t have an account?{' '}
           <Link href="/signup" className="text-blue-600 hover:underline">
