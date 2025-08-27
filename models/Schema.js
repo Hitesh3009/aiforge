@@ -2,9 +2,7 @@
 import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, unique: true },
-  password: String
+  email: { type: String, unique: true }
 }, { "collection": 'User' });
 
 const ImageSchema = new mongoose.Schema({
@@ -22,4 +20,4 @@ const ImageSchema = new mongoose.Schema({
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 const Image = mongoose.models.Image || mongoose.model('Image', ImageSchema);
 
-export { User, Image };
+export { User, Image  };
