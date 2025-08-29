@@ -12,14 +12,10 @@ export default function ImageGenerationPage() {
   const [selectedImages, setSelectedImages] = useState([]);
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    localStorage.getItem('token');
-  }, [])
 
   const generateImagesApi = async (userPrompt) => {
     const data = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/generate/image`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
       body: JSON.stringify({ prompt: userPrompt }),
     });
     const result = await data.json();
@@ -51,7 +47,6 @@ export default function ImageGenerationPage() {
     try {
       const data = await fetch('/api/save/images', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ selectedImages, prompt }),
       });
 
