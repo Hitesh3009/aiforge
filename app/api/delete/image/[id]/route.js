@@ -1,31 +1,19 @@
 import { connectToDatabase } from '@/lib/mongodb';
 import { Image } from '@/models/Schema';
-
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export async function DELETE(req,{params}) {
-
-    const authHeader = await req.headers.get('authorization');;
-    // console.log(authHeader);
-    
-    if (!authHeader) {
-        return new Response(JSON.stringify({ error: 'Authorization token is required' ,status:401}, { status: 401 }));
-    }
-    const tokenFromHeader = authHeader.split(' ')[1];
+    const session = await getServerSession(authOptions);
     try {
-        await connectToDatabase();
-        const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: tokenFromHeader })
-        });
-        const verifyResult = await verifyPayload.json();
-        if(verifyResult.success) {
-            const paramsObj = await params;
+        if(session) {
+            await connectToDatabase();
+            const paramsObj = await params;            
             const imageId = paramsObj.id;
             await Image.findByIdAndDelete(imageId);
             return new Response(JSON.stringify({ message: 'Image deleted successfully' ,status:200}), { status: 200 });
         }
         else{
-            return new Response(JSON.stringify({ error: 'Unauthorized.Please,Login Again.' ,status:401}), { status: 401 });
+            return new Response(JSON.stringify({ error: 'Unauthorized' ,status:401}), { status: 401 });
         }
     } catch (error) {
         console.error(error);

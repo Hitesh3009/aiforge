@@ -1,29 +1,22 @@
 import { GoogleGenAI, Modality } from "@google/genai";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req) {
     const { prompt } = await req.json();
-    const authHeader = await req.headers.get('authorization');;
-    
-    if (!authHeader) {
-        return new Response(JSON.stringify({ error: 'Authorization token is required' }, { status: 401 }));
-    }
-    const token = authHeader.split(' ')[1];
-    try {
-        const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: token })
-        });
-        const verifyResult = await verifyPayload.json();
-        if (!verifyResult.success) {
-            return new Response(JSON.stringify({ error: 'Unauthorized.Please,Login Again' }, { status: 401 }));
-        }
-        else {
+    const session = await getServerSession(authOptions);
 
+    try {
+        if (session) {
             const apiKey = process.env.GOOGLE_API_KEY
+            console.log(apiKey);
+            
             const ai = new GoogleGenAI({
                 apiKey: apiKey
             });
+
+            console.log(ai);
+            
             const contents = `${prompt}`;
             const imagePromises = Array.from({ length: 6 }, async () => {
 
@@ -45,7 +38,13 @@ export async function POST(req) {
                 }
             });
             // console.log('Generated images:', responseArr);
-            return new Response(JSON.stringify({ images: responseArr, status: 201 , userDetails:verifyResult}, { status: 201 }));
+            return new Response(JSON.stringify({ images: responseArr, status: 201 }, { status: 201 }));
+        }
+        else {
+            return new Response(
+                JSON.stringify({ error: "Unauthorized", success: false }),
+                { status: 401 }
+            );
         }
     }
     catch (error) {

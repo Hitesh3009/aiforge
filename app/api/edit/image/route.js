@@ -1,33 +1,21 @@
 import { GoogleGenAI, Modality } from "@google/genai";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function POST(req) {
-    const { prompt,inpBase64Img } = await req.json();
-    const authHeader = await req.headers.get('authorization');;
-
-    if (!authHeader) {
-        return new Response(JSON.stringify({ error: 'Authorization token is required' }, { status: 401 }));
-    }
-    const token = authHeader.split(' ')[1];
+    const session = await getServerSession(authOptions);
     try {
-        const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: token })
-        });
-        const verifyResult = await verifyPayload.json();
-        if (!verifyResult.success) {
-            return new Response(JSON.stringify({ error: 'Unauthorized.Please,Login Again' }, { status: 401 }));
-        }
-        else {
-
+        
+        if (session) {
+            const { prompt,inpBase64Img } = await req.json();
             const apiKey = process.env.GOOGLE_API_KEY
             const ai = new GoogleGenAI({
                 apiKey: apiKey
             });
             
             const base64Image = inpBase64Img ;
-           
-
+            
+            
             const contents = [
                 { text: `${prompt}` },
                 {
@@ -40,7 +28,7 @@ export async function POST(req) {
             // console.log(contents);
             
             const imagePromises = Array.from({ length: 3 }, async () => {
-
+                
                 return await ai.models.generateContent({
                     model: "gemini-2.0-flash-preview-image-generation",
                     contents: contents,
@@ -60,7 +48,10 @@ export async function POST(req) {
                 }
             });
             // console.log('Generated images:', responseArr);
-            return new Response(JSON.stringify({ images: responseArr, status: 201, userDetails: verifyResult }, { status: 201 }));
+            return new Response(JSON.stringify({ images: responseArr, status: 201 }, { status: 201 }));
+        }
+        else {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }, { status: 401 }));
         }
     }
     catch (error) {

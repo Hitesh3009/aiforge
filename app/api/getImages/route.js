@@ -1,26 +1,16 @@
 import { connectToDatabase } from "@/lib/mongodb";
-import { Image } from "@/models/Schema";
-export async function GET(req) {
-    const authHeader = await req.headers.get('authorization');;
-
-
-    if (!authHeader) {
-        return new Response(JSON.stringify({ error: 'Authorization token is required', status: 401 }, { status: 401 }));
-    }
-    const tokenFromHeader = authHeader.split(' ')[1];
+import { Image, User } from "@/models/Schema";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+export async function GET() {
+    const session = await getServerSession(authOptions);
     try {
-        await connectToDatabase();
-        const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: tokenFromHeader })
-        });
-        const verifyResult =await verifyPayload.json();
-        if (!verifyResult.success) {
-            return new Response(JSON.stringify({ error: 'Unauthorized.Please,Login Again', status: 401 }), { status: 401 });
-        }
-        else{
-            const userId = verifyResult.userID;
+        if (session) {
+            await connectToDatabase();
+            const userEmail=session.user.email;
+            const user=await User.findOne({email:userEmail});
+            
+            const userId = user._id;
             const imageData = await Image.find({ userId });
             // console.log(imageData);
             const imageArr = imageData.map(image=>{
@@ -32,6 +22,9 @@ export async function GET(req) {
             // console.log(imageArr.length);
             // console.log(imageArr);
             return new Response(JSON.stringify({ imageArr, status: 200 }), { status: 200 });
+        }
+        else{
+            return new Response(JSON.stringify({ error: 'Unauthorized', status: 401 }), { status: 401 });     
         }
     } catch (error) {
         console.error(error);

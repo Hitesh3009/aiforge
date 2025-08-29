@@ -1,37 +1,23 @@
 import { connectToDatabase } from '@/lib/mongodb';
-import { Image } from '@/models/Schema';
-
+import { Image, User } from '@/models/Schema';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export async function POST(req) {
-    const authHeader = await req.headers.get('authorization');
-    
-    if (!authHeader) {
-        return new Response(
-            JSON.stringify({ error: 'Authorization token is required', status: 401 }),
-            { status: 401 }
-        );
-    }
-
-    const tokenFromHeader = authHeader.split(' ')[1];
+    const session = await getServerSession(authOptions);
     try {
-        await connectToDatabase();
-
-        // ✅ Manually parse the body to avoid Next.js 413 error
-        const buffer = await req.arrayBuffer();
-        const text = new TextDecoder().decode(buffer);
-        const { selectedImages, prompt } = JSON.parse(text);
-
-        const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: tokenFromHeader })
-        });
-
-        const verifyResult = await verifyPayload.json();
-
-        if (verifyResult.success) {
+        if (session) {
+            await connectToDatabase();
+            // ✅ Manually parse the body to avoid Next.js 413 error
+            const buffer = await req.arrayBuffer();
+            const text = new TextDecoder().decode(buffer);
+            const { selectedImages, prompt } = JSON.parse(text);
+            const userEmail=session.user.email;
+            const user=await User.findOne({email:userEmail});
+            
+            const userId = user._id;
             for (const img of selectedImages) {
                 const userImageGallery = new Image({
-                    userId: verifyResult.userID,
+                    userId: userId,
                     imgDesc: prompt,
                     images: {
                         data: Buffer.from(img, 'base64'),
@@ -41,14 +27,14 @@ export async function POST(req) {
                 });
                 await userImageGallery.save();
             }
-
             return new Response(
                 JSON.stringify({ message: 'Images saved successfully', status: 200 }),
                 { status: 200 }
             );
-        } else {
+        }
+        else {
             return new Response(
-                JSON.stringify({ error: 'Unauthorized. Please, Login Again.', status: 401 }),
+                JSON.stringify({ error: 'Unauthorized', status: 401 }),
                 { status: 401 }
             );
         }
