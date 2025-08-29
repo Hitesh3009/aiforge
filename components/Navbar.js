@@ -10,46 +10,17 @@ const Navbar = () => {
   const [generateDropdownOpen, setGenerateDropdownOpen] = useState(false);
   const [mobileGenerateOpen, setMobileGenerateOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
-  const [username, setUsername] = useState('');
   const { data: session } = useSession();
-  // console.log(session);
-  
-  const verifyToken = async () => {
-    const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
-      method: 'POST',
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: localStorage.getItem('token') })
-    });
-    const verifyResult = await verifyPayload.json();
-    return verifyResult.success;
-  }
+  console.log(session);
 
   useEffect(() => {
-    let token = localStorage.getItem('token');
-    let name = localStorage.getItem('username');
-      setIsLogin(!!token);
-      setUsername(name);
-  }, [])
-
-  useEffect(() => {
-    const verifyToken = async () => {
-      const verifyPayload = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/auth/verify`, {
-        method: 'POST',
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: localStorage.getItem('token') })
-      });
-      const verifyResult = await verifyPayload.json();
-      if (!verifyResult.success) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        setIsLogin(false);
-      }
+    if(session){
+      setIsLogin(true);
     }
-    verifyToken();
   }, [])
+
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    signOut({ callbackUrl: '/login' });
     setIsLogin(false);
   }
 
@@ -107,19 +78,19 @@ const Navbar = () => {
             <div className='space-x-3'>
               <Link href="/login">
                 <button className="px-4 py-2 border rounded-md text-sm font-medium text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white transition">
-                  Login
+                  Sign In
                 </button>
               </Link>
-              <Link href="/signup">
+              {/* <Link href="/signup">
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition">
                   Sign Up
                 </button>
-              </Link>
+              </Link> */}
             </div>
           ) : (<Link href="/login">
             <div className='flex justify-evenly items-center space-x-2'>
-              <span className='text-purple-500 cursor-default'>Welcome <b>{session ? session.user.name : username}</b></span>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition cursor-pointer" onClick={session ? ()=>signOut({ callbackUrl: '/login' }) : handleLogout}>
+              <span className='text-purple-500 cursor-default'>Welcome <b>{session.user.name}</b></span>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition cursor-pointer" onClick={handleLogout}>
                 Sign Out
               </button>
             </div>
@@ -131,7 +102,7 @@ const Navbar = () => {
       {/* Hamburger Icon - mobile only */}
       <div className="md:hidden">
         <div className='flex justify-evenly items-center space-x-2'>
-          {session || isLogin ? <span className='text-purple-500'>Welcome <b>{session ? session.user.name : username}</b></span>:<div></div>}
+          {session || isLogin ? <span className='text-purple-500'>Welcome <b>{session.user.name}</b></span>:<div></div>}
           <button onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -173,14 +144,14 @@ const Navbar = () => {
               <div>
                 <Link href="/login" onClick={() => setMenuOpen(false)}>
                   <button className="w-full px-4 py-2 border rounded-md text-sm font-medium text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white transition">
-                    Login
+                    Sign In
                   </button>
                 </Link>
-                <Link href="/signup" onClick={() => setMenuOpen(false)}>
+                {/* <Link href="/signup" onClick={() => setMenuOpen(false)}>
                   <button className="my-3 w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition">
                     Sign Up
                   </button>
-                </Link>
+                </Link> */}
               </div>
             ) : (<Link href="/login" onClick={() => setMenuOpen(false)}>
               <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition" onClick={session ? ()=>signOut({ callbackUrl: '/login' }) : handleLogout}>
