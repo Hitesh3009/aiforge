@@ -13,13 +13,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/getImages`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/getImages`);
         const data = await res.json();
         setImages(data.imageArr || []);
       } catch (err) {
@@ -35,13 +29,11 @@ export default function Dashboard() {
 
   const confirmDelete = async (image) => {
     if (!image) return;
-
+    console.log(image);
+    
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/delete/image/${image.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        method: 'DELETE'
       });
 
       if (res.ok) {
