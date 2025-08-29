@@ -1,21 +1,14 @@
 'use client';
 import React, { useState } from 'react';
-import Link from 'next/link';
 import Notification from './Notification';
-import { useRouter } from 'next/navigation';
 import { FaGithub,FaDiscord,FaFacebookSquare   } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 
 const Login = () => {
-  const [form, setForm] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
-  const router = useRouter();
-  // const handleChange = (e) => {
-  //   setForm({ ...form, [e.target.name]: e.target.value });
-  // };
-
+  const {data: session}=useSession();
   const GitHubLoginButton=()=> {
 
   return (
@@ -63,32 +56,6 @@ const Login = () => {
   );
 }
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   let res=await signIn("email", { email: form.email, callbackUrl: "/" });
-  //   if(res.ok){   
-  //     const userPayload = await fetch('/api/auth/login', {
-  //     method: 'POST',
-  //     body: JSON.stringify(form),
-  //     headers: { 'Content-Type': 'application/json' },
-  //   })
-  //     if (userPayload.ok) {
-  //     const msg = await userPayload.json();
-  //     setMessage(msg);
-  //     localStorage.setItem('token', msg.token);
-  //     localStorage.setItem('username', msg.user.name);
-  //     router.push('/');
-  //   }
-  //     else {
-  //     const msg = await userPayload.json();
-  //     // console.log('Error:', msg);
-  //     setMessage(msg);
-  //   }
-  //   }
-  //   else if(res.error){
-  //     console.log('Error in login: ',res.error)
-  //   }
-  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -129,7 +96,7 @@ const Login = () => {
             Login
           </button>
         </form> */}
-        <Notification userName={message.status === 200 ? message.user.name : null} isLogin={true} email={form.email} message={message.status === 404 || message.status === 401 ? message.error : message.successMsg} statusCode={message.status} onClose={() => setMessage('')} />
+        <Notification userName={message.status === 200 ? message.user.name : null} isLogin={true} email={session && session.user.name} message={message.status === 404 || message.status === 401 ? message.error : message.successMsg} statusCode={message.status} onClose={() => setMessage('')} />
         
         {/* <p className="text-center text-sm text-gray-600 mt-4">
           Don&apos;t have an account?{' '}
