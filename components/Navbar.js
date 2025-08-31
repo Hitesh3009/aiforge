@@ -95,7 +95,7 @@ const Navbar = () => {
       {/* Hamburger Icon - mobile only */}
       <div className="md:hidden">
         <div className='flex justify-evenly items-center space-x-2'>
-          {session ? <span className='text-purple-500'>Welcome <b>{session.user.name}</b></span>:<div></div>}
+          {session ? <span className='text-purple-500 cursor-default'>Welcome <b>{session.user.name}</b></span>:<div></div>}
           <button onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
