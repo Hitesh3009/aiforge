@@ -7,6 +7,8 @@ export default function EditImage() {
     const [images, setImages] = useState([]);
     const [caption, setCaption] = useState("");
     const [editedImages, setEditedImages] = useState([]);
+    const [enhancementLoading, setEnhancementLoading] = useState(false);
+    const [enhancedPrompt, setEnhancePrompt] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [zoomedImage, setZoomedImage] = useState(null);
     const [saving, setSaving] = useState(false); // new state for saving images
@@ -25,6 +27,25 @@ export default function EditImage() {
         };
         fetchImages();
     }, []);
+
+    const handleEnhancedPrompt = async () => {
+        if (!caption.trim()) return;
+        setEnhancementLoading(true);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/enhancePrompt`, {
+            method: "POST",
+            headers: { "Content-type": "application/json" },
+            body: JSON.stringify({ userPrompt: caption })
+        });
+        const jsonData = await res.json();
+        setEnhancePrompt(jsonData.enhancedPrompt);
+        setEnhancementLoading(false)
+    }
+
+    const stripHtml = (html) => {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = html;
+        return tempDiv.textContent.replace(/```html|```/g, '').trim() || tempDiv.innerText.replace(/```html|```/g, '').trim() || "";
+    };
 
     const handleDeviceUpload = (e) => {
         const file = e.target.files[0];
@@ -191,15 +212,56 @@ export default function EditImage() {
                                 value={caption}
                                 onChange={(e) => setCaption(e.target.value)}
                                 placeholder="Describe what needs to be edited in this image."
-                                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+                                className=" scrollbar-hide w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
                             ></textarea>
                             <button
                                 onClick={handleStartEditing}
                                 disabled={isEditing || !caption.trim()}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow disabled:opacity-50"
+                                className={`mt-4 w-full mr-2 md:w-auto px-6 py-2 rounded-md transition text-sm md:text-base lg:text-xl
+    ${isEditing || !caption.trim() || enhancementLoading
+                                        ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                                        : 'bg-blue-600 hover:bg-blue-700 text-white font-medium'}`}
                             >
                                 {isEditing ? "Editing..." : "Start Editing"}
                             </button>
+                            {/* Enhance Prompt button */}
+                            {caption.trim() && (
+                                <button
+                                    onClick={handleEnhancedPrompt}
+                                    disabled={isEditing || enhancementLoading}
+                                    className={`mt-4 w-full ml-2 md:w-auto px-6 py-2 rounded-md text-sm md:text-base lg:text-xl
+      ${isEditing || enhancementLoading
+                                            ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                                            : 'bg-purple-600 hover:bg-purple-700 text-white font-medium shadow-md'}
+    `}
+                                >
+                                    {enhancementLoading ? "Enhancing..." : "✨ Enhance Prompt"}
+                                </button>
+                            )}
+
+                            {/* Enhanced Prompt Preview */}
+                            {enhancedPrompt && (
+                                <div className="mt-6 p-5 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-2">✨ Enhanced Prompt</h3>
+                                    <div
+                                        className="prose prose-sm max-w-none text-gray-700 bg-gray-50 p-4 rounded-md overflow-auto max-h-56 scrollbar-hide"
+                                        dangerouslySetInnerHTML={{
+                                            __html: enhancedPrompt.replace(/```html|```/g, '').trim(),
+                                        }}
+                                    />
+                                    <div className="flex justify-end mt-4">
+                                        <button
+                                            onClick={() => {
+                                                setCaption(stripHtml(enhancedPrompt))
+                                                setEnhancePrompt('');
+                                            }}
+                                            className="px-5 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white font-medium transition"
+                                        >
+                                            ✅ Use this Prompt
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 

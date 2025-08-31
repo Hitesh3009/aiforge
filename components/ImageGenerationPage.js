@@ -7,10 +7,12 @@ export default function ImageGenerationPage() {
   const [prompt, setPrompt] = useState('');
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [enhancementLoading, setEnhancementLoading] = useState(false);
   const [saving, setSaving] = useState(false); // new state for saving images
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
   const [message, setMessage] = useState('');
+  const [enhancedPrompt, setEnhancePrompt] = useState('');
 
 
   const generateImagesApi = async (userPrompt) => {
@@ -21,6 +23,25 @@ export default function ImageGenerationPage() {
     const result = await data.json();
     return result;
   };
+
+  const handleEnhancedPrompt = async () => {
+    if (!prompt.trim()) return;
+    setEnhancementLoading(true);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/enhancePrompt`, {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify({ userPrompt: prompt })
+    });
+    const jsonData = await res.json();
+    setEnhancePrompt(jsonData.enhancedPrompt);
+    setEnhancementLoading(false)
+  }
+
+  const stripHtml = (html) => {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+  return tempDiv.textContent.replace(/```html|```/g, '').trim() || tempDiv.innerText.replace(/```html|```/g, '').trim() || "";
+};
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -72,16 +93,59 @@ export default function ImageGenerationPage() {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Describe the image you want to generate..."
-          className="w-full p-4 border border-gray-300 rounded-md resize-none h-36 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="scrollbar-hide w-full p-4 border border-gray-300 rounded-md resize-none h-36 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           onClick={handleGenerate}
-          disabled={loading}
-          className={`mt-4 w-full md:w-auto px-6 py-2 rounded-md transition text-sm md:text-base lg:text-xl 
-            ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white font-medium'}`}
+          disabled={loading || !prompt.trim() || enhancementLoading}
+          className={`mt-4 w-full md:w-auto px-6 py-2 rounded-md transition text-sm md:text-base lg:text-xl
+    ${loading || !prompt.trim() || enhancementLoading
+              ? 'bg-gray-400 cursor-not-allowed opacity-50'
+              : 'bg-blue-600 hover:bg-blue-700 text-white font-medium'}
+  `}
         >
           {loading ? 'Generating...' : 'Generate'}
         </button>
+
+        {/* Enhance Prompt button */}
+        {prompt.trim() && (
+          <button
+            onClick={handleEnhancedPrompt}
+            disabled={loading || enhancementLoading}
+            className={`mt-4 w-full md:w-auto px-6 py-2 rounded-md text-sm md:text-base lg:text-xl
+      ${loading || enhancementLoading
+                ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                : 'bg-purple-600 hover:bg-purple-700 text-white font-medium shadow-md'}
+    `}
+          >
+            {enhancementLoading ? "Enhancing..." : "✨ Enhance Prompt"}
+          </button>
+        )}
+
+        {/* Enhanced Prompt Preview */}
+        {enhancedPrompt && (
+          <div className="mt-6 p-5 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">✨ Enhanced Prompt</h3>
+            <div
+              className="prose prose-sm max-w-none text-gray-700 bg-gray-50 p-4 rounded-md overflow-auto max-h-56 scrollbar-hide"
+              dangerouslySetInnerHTML={{
+                __html: enhancedPrompt.replace(/```html|```/g, '').trim(),
+              }}
+            />
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => {
+                  setPrompt(stripHtml(enhancedPrompt))
+                  setEnhancePrompt('');
+                }}
+                className="px-5 py-2 rounded-md bg-green-600 hover:bg-green-700 text-white font-medium transition"
+              >
+                ✅ Use this Prompt
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {(loading || images.length > 0) && (
