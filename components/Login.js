@@ -62,9 +62,9 @@ const Login = () => {
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-blue-600 mb-6">SignIn to AiForge</h2>
         <div className='flex items-center flex-col space-y-4'>
-          {GoogleLoginButton()}
-          {GitHubLoginButton()}
-          {DiscordLoginButton()}
+          <GoogleLoginButton />
+          <GitHubLoginButton/>
+          <DiscordLoginButton/>
           {/* {FacebookLoginButton()} */}
         </div>
         {/* <div className='my-5 flex justify-center'>
