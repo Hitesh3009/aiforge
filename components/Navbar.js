@@ -80,22 +80,24 @@ const Navbar = () => {
                 </button>
               </Link> */}
             </div>
-          ) : (<Link href="/login">
+          ) : (
             <div className='flex justify-evenly items-center space-x-2'>
-              <span className='text-purple-500 cursor-default'>Welcome <b>{session.user.name}</b></span>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition cursor-pointer" onClick={handleLogout}>
-                Sign Out
-              </button>
+              <span className='text-purple-500 cursor-not-allowed'>Welcome <b>{session.user.name}</b></span>
+              <Link href="/login">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition cursor-pointer" onClick={handleLogout}>
+                  Sign Out
+                </button>
+              </Link>
             </div>
 
-          </Link>)
+          )
         }
       </div>
 
       {/* Hamburger Icon - mobile only */}
       <div className="md:hidden">
         <div className='flex justify-evenly items-center space-x-2'>
-          {session ? <span className='text-purple-500 cursor-default'>Welcome <b>{session.user.name}</b></span>:<div></div>}
+          {session ? <span className='text-purple-500 cursor-not-allowed'>Welcome <b>{session.user.name}</b></span> : <div></div>}
           <button onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -147,7 +149,7 @@ const Navbar = () => {
                 </Link> */}
               </div>
             ) : (<Link href="/login" onClick={() => setMenuOpen(false)}>
-              <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition" onClick={session ? ()=>signOut({ callbackUrl: '/login' }) : handleLogout}>
+              <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition" onClick={session ? () => signOut({ callbackUrl: '/login' }) : handleLogout}>
                 Sign Out
               </button>
             </Link>)
