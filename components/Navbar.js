@@ -9,19 +9,12 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [generateDropdownOpen, setGenerateDropdownOpen] = useState(false);
   const [mobileGenerateOpen, setMobileGenerateOpen] = useState(false);
-  const [isLogin, setIsLogin] = useState(false);
   const { data: session } = useSession();
   console.log(session);
 
-  useEffect(() => {
-    if(session){
-      setIsLogin(true);
-    }
-  }, [])
 
   const handleLogout = () => {
     signOut({ callbackUrl: '/login' });
-    setIsLogin(false);
   }
 
   return (
@@ -46,21 +39,21 @@ const Navbar = () => {
           {generateDropdownOpen && (
             <div className="absolute top-8 left-0 bg-white rounded shadow-lg py-2 z-50 w-48">
               <Link
-                href={`${isLogin ? '/generate/image' : '/login'}`}
+                href={`${session ? '/generate/image' : '/login'}`}
                 className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
                 onClick={() => setGenerateDropdownOpen(false)}
               >
                 Image Generation
               </Link>
               {/* <Link
-                href={`${isLogin ? '/generate/video' : '/login'}`}
+                href={`${session ? '/generate/video' : '/login'}`}
                 className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
                 onClick={() => setGenerateDropdownOpen(false)}
               >
                 Video Generation
               </Link> */}
               <Link
-                href={`${isLogin ? '/generate/speech' : '/login'}`}
+                href={`${session ? '/generate/speech' : '/login'}`}
                 className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
                 onClick={() => setGenerateDropdownOpen(false)}
               >
@@ -70,11 +63,11 @@ const Navbar = () => {
           )}
         </div>
 
-        <Link href={`${isLogin ? '/edit/image' : '/login'}`} className="text-gray-300 hover:text-blue-600">Edit</Link>
-        <Link href={`${isLogin ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600">Articles</Link>
+        <Link href={`${session ? '/edit/image' : '/login'}`} className="text-gray-300 hover:text-blue-600">Edit</Link>
+        <Link href={`${session ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600">Articles</Link>
 
         {
-          !session && !isLogin ? (
+          !session ? (
             <div className='space-x-3'>
               <Link href="/login">
                 <button className="px-4 py-2 border rounded-md text-sm font-medium text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white transition">
@@ -102,7 +95,7 @@ const Navbar = () => {
       {/* Hamburger Icon - mobile only */}
       <div className="md:hidden">
         <div className='flex justify-evenly items-center space-x-2'>
-          {session || isLogin ? <span className='text-purple-500'>Welcome <b>{session.user.name}</b></span>:<div></div>}
+          {session ? <span className='text-purple-500'>Welcome <b>{session.user.name}</b></span>:<div></div>}
           <button onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -123,24 +116,24 @@ const Navbar = () => {
             </button>
             {mobileGenerateOpen && (
               <div className="pl-4 space-y-1">
-                <Link href={`${isLogin ? '/generate/image' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
+                <Link href={`${session ? '/generate/image' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
                   Image Generation
                 </Link>
-                {/* <Link href={`${isLogin ? '/generate/video' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
+                {/* <Link href={`${session ? '/generate/video' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
                   Video Generation
                 </Link> */}
-                <Link href={`${isLogin ? '/generate/speech' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
+                <Link href={`${session ? '/generate/speech' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
                   Speech Generation
                 </Link>
               </div>
             )}
           </div>
 
-          <Link href={`${isLogin ? '/edit' : '/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Edit</Link>
-          <Link href={`${isLogin ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Articles</Link>
+          <Link href={`${session ? '/edit/image' : '/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Edit</Link>
+          <Link href={`${session ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Articles</Link>
 
           {
-            !session && !isLogin ? (
+            !session ? (
               <div>
                 <Link href="/login" onClick={() => setMenuOpen(false)}>
                   <button className="w-full px-4 py-2 border rounded-md text-sm font-medium text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white transition">
