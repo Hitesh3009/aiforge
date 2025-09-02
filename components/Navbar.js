@@ -8,10 +8,11 @@ import { signOut, useSession } from "next-auth/react";
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [generateDropdownOpen, setGenerateDropdownOpen] = useState(false);
+  const [editDropdownOpen, setEditDropdownOpen] = useState(false);
   const [mobileGenerateOpen, setMobileGenerateOpen] = useState(false);
+  const [mobileEditOpen, setMobileEditOpen] = useState(false);
   const { data: session } = useSession();
   console.log(session);
-
 
   const handleLogout = () => {
     signOut({ callbackUrl: '/login' });
@@ -45,13 +46,6 @@ const Navbar = () => {
               >
                 Image Generation
               </Link>
-              {/* <Link
-                href={`${session ? '/generate/video' : '/login'}`}
-                className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
-                onClick={() => setGenerateDropdownOpen(false)}
-              >
-                Video Generation
-              </Link> */}
               <Link
                 href={`${session ? '/generate/speech' : '/login'}`}
                 className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
@@ -63,7 +57,35 @@ const Navbar = () => {
           )}
         </div>
 
-        <Link href={`${session ? '/edit/image' : '/login'}`} className="text-gray-300 hover:text-blue-600">Edit</Link>
+        {/* Edit Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setEditDropdownOpen(!editDropdownOpen)}
+            className="flex items-center text-gray-300 hover:text-blue-600 gap-1 cursor-pointer"
+          >
+            Edit <ChevronDown size={16} />
+          </button>
+
+          {editDropdownOpen && (
+            <div className="absolute top-8 left-0 bg-white rounded shadow-lg py-2 z-50 w-56">
+              <Link
+                href={`${session ? '/edit/image' : '/login'}`}
+                className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                onClick={() => setEditDropdownOpen(false)}
+              >
+                Image + Text Edit
+              </Link>
+              <Link
+                href={`${session ? '/multiImageEdit/image' : '/login'}`}
+                className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                onClick={() => setEditDropdownOpen(false)}
+              >
+                Multi-Image Edit
+              </Link>
+            </div>
+          )}
+        </div>
+
         <Link href={`${session ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600">Articles</Link>
 
         {
@@ -74,11 +96,6 @@ const Navbar = () => {
                   Sign In
                 </button>
               </Link>
-              {/* <Link href="/signup">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition">
-                  Sign Up
-                </button>
-              </Link> */}
             </div>
           ) : (
             <div className='flex justify-evenly items-center space-x-2'>
@@ -89,7 +106,6 @@ const Navbar = () => {
                 </button>
               </Link>
             </div>
-
           )
         }
       </div>
@@ -107,6 +123,7 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="absolute top-16 left-0 w-full bg-black shadow-md px-6 py-4 flex flex-col space-y-3 md:hidden z-50">
+          
           {/* Generate Dropdown in Mobile */}
           <div className="space-y-1">
             <button
@@ -121,9 +138,6 @@ const Navbar = () => {
                 <Link href={`${session ? '/generate/image' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
                   Image Generation
                 </Link>
-                {/* <Link href={`${session ? '/generate/video' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
-                  Video Generation
-                </Link> */}
                 <Link href={`${session ? '/generate/speech' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
                   Speech Generation
                 </Link>
@@ -131,7 +145,27 @@ const Navbar = () => {
             )}
           </div>
 
-          <Link href={`${session ? '/edit/image' : '/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Edit</Link>
+          {/* Edit Dropdown in Mobile */}
+          <div className="space-y-1">
+            <button
+              className="flex items-center justify-between w-full text-gray-300 font-medium"
+              onClick={() => setMobileEditOpen(!mobileEditOpen)}
+            >
+              <span>Edit</span>
+              <ChevronDown size={16} className={`${mobileEditOpen ? 'rotate-180' : ''} transition-transform`} />
+            </button>
+            {mobileEditOpen && (
+              <div className="pl-4 space-y-1">
+                <Link href={`${session ? '/edit/image' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
+                  Image + Text Edit
+                </Link>
+                <Link href={`${session ? '/multiImageEdit/image' : '/login'}`} className="block text-sm text-gray-400" onClick={() => setMenuOpen(false)}>
+                  Multi-Image Edit
+                </Link>
+              </div>
+            )}
+          </div>
+
           <Link href={`${session ? '/articles' : '/login'}`} className="text-gray-300 hover:text-blue-600" onClick={() => setMenuOpen(false)}>Articles</Link>
 
           {
@@ -142,11 +176,6 @@ const Navbar = () => {
                     Sign In
                   </button>
                 </Link>
-                {/* <Link href="/signup" onClick={() => setMenuOpen(false)}>
-                  <button className="my-3 w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition">
-                    Sign Up
-                  </button>
-                </Link> */}
               </div>
             ) : (<Link href="/login" onClick={() => setMenuOpen(false)}>
               <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition" onClick={session ? () => signOut({ callbackUrl: '/login' }) : handleLogout}>
