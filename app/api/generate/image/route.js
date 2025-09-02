@@ -15,7 +15,7 @@ export async function POST(req) {
                 apiKey: apiKey
             });
 
-            console.log(ai);
+            // console.log(ai);
             
             const contents = `${prompt}`;
             const imagePromises = Array.from({ length: 6 }, async () => {
