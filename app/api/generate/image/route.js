@@ -2,6 +2,15 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '100mb',
+    },
+  },
+};
+
+
 export async function POST(req) {
     const { prompt } = await req.json();
     const session = await getServerSession(authOptions);
