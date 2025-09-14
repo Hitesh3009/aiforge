@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Notification from './Notification';
 
 export default function ImageGenerationPage() {
@@ -38,10 +38,10 @@ export default function ImageGenerationPage() {
   }
 
   const stripHtml = (html) => {
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = html;
-  return tempDiv.textContent.replace(/```html|```/g, '').trim() || tempDiv.innerText.replace(/```html|```/g, '').trim() || "";
-};
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent.replace(/```html|```/g, '').trim() || tempDiv.innerText.replace(/```html|```/g, '').trim() || "";
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -61,14 +61,32 @@ export default function ImageGenerationPage() {
     );
   };
 
+  function base64ToBlob(base64, mimeType = "image/png") {
+    const byteChars = atob(base64);
+    const byteNumbers = new Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) {
+      byteNumbers[i] = byteChars.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  }
+
   const handleSaveImages = async () => {
     if (selectedImages.length === 0) return;
 
     setSaving(true); // disable button + show saving state
     try {
+      const formData = new FormData();
+      selectedImages.forEach((b64) => {
+        const blob = base64ToBlob(b64);
+        formData.append("images", blob, "upload.png"); // add filename too
+      });
+      formData.append("prompt", prompt);
+
+
       const data = await fetch('/api/save/images', {
         method: 'POST',
-        body: JSON.stringify({ selectedImages, prompt }),
+        body: formData,
       });
 
       const jsonData = await data.json();
