@@ -7,20 +7,22 @@ export async function POST(req) {
     try {
         if (session) {
             await connectToDatabase();
-            // ✅ Manually parse the body to avoid Next.js 413 error
-            const buffer = await req.arrayBuffer();
-            const text = new TextDecoder().decode(buffer);
-            const { selectedImages, prompt } = JSON.parse(text);
-            const userEmail=session.user.email;
-            const user=await User.findOne({email:userEmail});
+            const formData = await req.formData();
+            const prompt = formData.get("prompt");
+            const selectedImages = formData.getAll("images"); // File objects
             
+            const userEmail = session.user.email;
+            const user = await User.findOne({ email: userEmail });
+
             const userId = user._id;
             for (const img of selectedImages) {
+                const arrayBuffer = await img.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
                 const userImageGallery = new Image({
                     userId: userId,
                     imgDesc: prompt,
                     images: {
-                        data: Buffer.from(img, 'base64'),
+                        data: buffer,
                         contentType: 'image/png'
                     },
                     createdAt: Date.now()
