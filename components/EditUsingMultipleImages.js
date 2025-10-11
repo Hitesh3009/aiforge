@@ -122,6 +122,16 @@ export default function EditWithReference() {
         );
     };
 
+    function base64ToBlob(base64, mimeType = "image/png") {
+        const byteChars = atob(base64);
+        const byteNumbers = new Array(byteChars.length);
+        for (let i = 0; i < byteChars.length; i++) {
+            byteNumbers[i] = byteChars.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: mimeType });
+    }
+
     const handleSaveImages = async () => {
         if (selectedEdited.length === 0) return;
         setSaving(true);
@@ -131,7 +141,7 @@ export default function EditWithReference() {
                 const blob = base64ToBlob(b64);
                 formData.append("images", blob, "upload.png"); // add filename too
             });
-            formData.append("prompt", prompt);
+            formData.append("prompt", caption);
             const res = await fetch("/api/save/images", {
                 method: "POST",
                 body: formData

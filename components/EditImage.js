@@ -61,6 +61,16 @@ export default function EditImage() {
         }
     };
 
+      function base64ToBlob(base64, mimeType = "image/png") {
+    const byteChars = atob(base64);
+    const byteNumbers = new Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) {
+      byteNumbers[i] = byteChars.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  }
+  
     const handleSaveImages = async () => {
         if (selectedEdited.length === 0) return;
 
@@ -71,7 +81,7 @@ export default function EditImage() {
         const blob = base64ToBlob(b64);
         formData.append("images", blob, "upload.png"); // add filename too
       });
-      formData.append("prompt", prompt);
+      formData.append("prompt", caption);
             const data = await fetch('/api/save/images', {
                 method: 'POST',
                 body: formData
@@ -80,6 +90,7 @@ export default function EditImage() {
             const jsonData = await data.json();
             setMessage(jsonData);
         } catch (error) {
+            console.error(error);
             setMessage({ error: "Failed to save images", status: 500 });
         } finally {
             setSaving(false); // re-enable button after request finishes
