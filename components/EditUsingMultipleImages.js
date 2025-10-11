@@ -126,12 +126,15 @@ export default function EditWithReference() {
         if (selectedEdited.length === 0) return;
         setSaving(true);
         try {
+            const formData = new FormData();
+            selectedEdited.forEach((b64) => {
+                const blob = base64ToBlob(b64);
+                formData.append("images", blob, "upload.png"); // add filename too
+            });
+            formData.append("prompt", prompt);
             const res = await fetch("/api/save/images", {
                 method: "POST",
-                body: JSON.stringify({
-                    selectedImages: selectedEdited,
-                    prompt: caption,
-                }),
+                body: formData
             });
             const jsonData = await res.json();
             setMessage(jsonData);
@@ -247,8 +250,8 @@ export default function EditWithReference() {
                         onClick={handleStartEditing}
                         disabled={isEditing || !caption.trim()}
                         className={`px-6 py-2 rounded-md text-sm md:text-base lg:text-xl ${isEditing || !caption.trim() || enhancementLoading
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-blue-600 hover:bg-blue-700 text-white font-medium"
                             }`}
                     >
                         {isEditing ? "Editing..." : "Start Editing"}
@@ -258,8 +261,8 @@ export default function EditWithReference() {
                             onClick={handleEnhancedPrompt}
                             disabled={isEditing || enhancementLoading}
                             className={`px-6 py-2 rounded-md text-sm md:text-base lg:text-xl ${isEditing || enhancementLoading
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-purple-600 hover:bg-purple-700 text-white font-medium"
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-purple-600 hover:bg-purple-700 text-white font-medium"
                                 }`}
                         >
                             {enhancementLoading ? "Enhancing..." : "✨ Enhance Prompt"}
@@ -305,8 +308,8 @@ export default function EditWithReference() {
                                     onClick={handleSaveImages}
                                     disabled={saving}
                                     className={`px-6 py-2 rounded-md text-sm md:text-base lg:text-xl text-white font-medium ${saving
-                                            ? "bg-gray-400 cursor-not-allowed"
-                                            : "bg-green-600 hover:bg-green-700"
+                                        ? "bg-gray-400 cursor-not-allowed"
+                                        : "bg-green-600 hover:bg-green-700"
                                         }`}
                                 >
                                     {saving ? "Saving..." : "Save images to Gallery?"}

@@ -66,9 +66,15 @@ export default function EditImage() {
 
         setSaving(true); // disable button + show saving state
         try {
+            const formData = new FormData();
+      selectedEdited.forEach((b64) => {
+        const blob = base64ToBlob(b64);
+        formData.append("images", blob, "upload.png"); // add filename too
+      });
+      formData.append("prompt", prompt);
             const data = await fetch('/api/save/images', {
                 method: 'POST',
-                body: JSON.stringify({ selectedImages: selectedEdited, prompt: caption }),
+                body: formData
             });
 
             const jsonData = await data.json();
