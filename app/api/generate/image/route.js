@@ -1,13 +1,12 @@
-import { GoogleGenAI, Modality } from "@google/genai";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb',
+    api: {
+        bodyParser: {
+            sizeLimit: '100mb',
+        },
     },
-  },
 };
 
 
@@ -17,37 +16,69 @@ export async function POST(req) {
 
     try {
         if (session) {
-            const apiKey = process.env.GOOGLE_API_KEY
-            console.log(apiKey);
-            
-            const ai = new GoogleGenAI({
-                apiKey: apiKey
-            });
+            const apiKey = process.env.FREEPIK_API_KEY
+            //console.log(apiKey);
 
-            // console.log(ai);
-            
-            const contents = `${prompt}`;
+            const url = 'https://api.freepik.com/v1/ai/text-to-image/seedream-v4';
+            const options = {
+                method: 'POST',
+                headers: { 'x-freepik-api-key': apiKey, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "prompt": prompt, "aspect_ratio": "square_1_1", "guidance_scale": 2.5, "seed": 1073741823 })
+            };
+
+            //console.log(options);
+
             const imagePromises = Array.from({ length: 6 }, async () => {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                //console.log('what is data', data);
 
-                return await ai.models.generateContent({
-                    model: "gemini-2.0-flash-preview-image-generation",
-                    contents: contents,
-                    config: {
-                        responseModalities: [Modality.TEXT, Modality.IMAGE],
-                    }
-                });
+                return data.data;
             });
+
+            //console.log(imagePromises);
             const resolvedPromiseRes = await Promise.all(imagePromises);
+            //console.log(resolvedPromiseRes);
 
-            const responseArr = resolvedPromiseRes.map((response) => {
-                const imagePart = response.candidates[0].content.parts.find(part => part.inlineData);
-                if (imagePart) {
-                    const base64Encode = imagePart.inlineData.data;
-                    return base64Encode
+            let finalImageArr = [];
+
+            const taskIds = resolvedPromiseRes.map(item => item.task_id);
+
+            let status = "IN_PROGRESS";
+            while (status !== "COMPLETED") {
+                await new Promise((res) => setTimeout(res, 3000));
+
+                const pollResults = await Promise.all(
+                    taskIds.map(async (taskId) => {
+                        const pollRes = await fetch(
+                            `https://api.freepik.com/v1/ai/text-to-image/seedream-v4/${taskId}`,
+                            {
+                                method: "GET",
+                                headers: { "x-freepik-api-key": apiKey }
+                            }
+                        );
+                        return pollRes.json();
+                    })
+                );
+
+                // Check if all tasks are completed
+                status = pollResults.every(r => r.data.status === "COMPLETED")
+                    ? "COMPLETED"
+                    : "IN_PROGRESS";
+
+                if (status === "COMPLETED") {
+                    pollResults.forEach(r => {
+                        if (r.data.generated) {
+                            finalImageArr.push(r.data.generated[0]);
+                        }
+                    });
                 }
-            });
-            // console.log('Generated images:', responseArr);
-            return new Response(JSON.stringify({ images: responseArr, status: 201 }, { status: 201 }));
+            }
+
+
+            //console.log(finalImageArr);
+
+            return new Response(JSON.stringify({ images: finalImageArr, status: 201 }, { status: 201 }));
         }
         else {
             return new Response(
