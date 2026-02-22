@@ -313,7 +313,7 @@ export default function EditImage() {
                                             }`}
                                     >
                                         <img
-                                            src={`data:image/png;base64,${img}`}
+                                            src={`${img}`}
                                             alt={`Edited ${index}`}
                                             className="rounded-lg max-h-64 object-cover w-full h-full"
                                         />
@@ -321,7 +321,7 @@ export default function EditImage() {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setZoomedImage(`data:image/png;base64,${img}`);
+                                                setZoomedImage(`${img}`);
                                             }}
                                             className="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 shadow hover:bg-opacity-100"
                                         >
