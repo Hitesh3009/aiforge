@@ -226,7 +226,7 @@ export default function ImageGenerationPage() {
 
                   <div className="aspect-square w-full">
                     <img
-                      src={`data:image/jpeg;base64,${src}`}
+                      src={`${src}`}
                       alt={`Generated ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -253,7 +253,7 @@ export default function ImageGenerationPage() {
               &times;
             </button>
             <img
-              src={`data:image/jpeg;base64,${selectedImage}`}
+              src={`${selectedImage}`}
               alt="Zoomed"
               className="max-h-[90vh] w-auto rounded-lg shadow-lg object-contain"
             />
