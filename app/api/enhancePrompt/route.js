@@ -10,7 +10,7 @@ export async function POST(req) {
         if (session) {
             const { userPrompt } = await req.json();
             const model = new ChatGoogleGenerativeAI({
-                model: "gemini-2.0-flash",
+                model: "gemini-3-flash-preview",
                 temperature: 0.7,
                 apiKey: process.env.GOOGLE_API_KEY
             });
